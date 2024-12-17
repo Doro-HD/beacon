@@ -1,0 +1,27 @@
+import { describe, expect, test } from 'vitest';
+import { render } from '@testing-library/svelte';
+import '@testing-library/jest-dom/vitest';
+
+import Card from '../Card.svelte';
+
+describe('Card', () => {
+	test('Should be in the document', () => {
+		const card = render(Card)
+
+		expect(card.baseElement).toBeInTheDocument();
+	}),
+
+		test('Should render with the correct props', () => {
+			const title = 'Card title';
+			const description = 'Card description'
+			const card = render(Card, { title, description });
+
+			const titleElement = card.getByText(title);
+			const descriptionElement = card.getByText(description);
+
+			expect(titleElement).toBeInTheDocument();
+			expect(titleElement).toHaveClass('type-scale-5');
+
+			expect(descriptionElement).toBeInTheDocument();
+		})
+});
