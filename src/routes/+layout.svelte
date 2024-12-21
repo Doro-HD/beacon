@@ -2,9 +2,9 @@
 	import type { Snippet } from 'svelte';
 	import { setMode, ModeWatcher } from 'mode-watcher';
 
-	import { beaconStore } from '$lib/stores/beaconStore.svelte';
+	import { beaconStore } from '$lib/api/beacons';
 	import '../app.css';
-	import { Sidebar } from '$lib/components/sidebar';
+	import { Sidebar } from '$lib/ui/components/sidebar';
 
 	type Props = {
 		children: Snippet;

@@ -1,5 +1,5 @@
 import { readTextFile as tauriReadTextFile, type ReadDirOptions, writeTextFile as tauriWriteTextFile, type WriteFileOptions } from "@tauri-apps/plugin-fs";
-import type { Result } from "$lib/util/result";
+import { ok, err, type Result } from "$lib/util/result";
 
 /**
 * @description
@@ -17,7 +17,7 @@ export async function readTextFile(path: string | URL, options?: ReadDirOptions)
 	} catch (err) {
 		return {
 			status: 'error',
-			data: `Could not read from file due to: ${err}`
+			reason: `Could not read from file due to: ${err}`
 		}
 	}
 }
@@ -26,20 +26,14 @@ export async function readTextFile(path: string | URL, options?: ReadDirOptions)
 * @description
 * A safe wrapper around Tauri's writeTextFile function
 */
-export async function writeTextFile(path: string | URL, data: string, options?: WriteFileOptions): Promise<Result<string, string>> {
+export async function writeTextFile(path: string | URL, data: string, options?: WriteFileOptions): Promise<Result<null, string>> {
 	try {
 		await tauriWriteTextFile(path, data, options);
 
-		return {
-			status: 'success',
-			data: data
-		}
+		return ok(null);
 
-	} catch (err) {
-		return {
-			status: 'error',
-			data: `Could not write to file due to: ${err}`
-		}
+	} catch (e) {
+		return err(`Could not write to file due to: ${e}`);
 	}
 }
 

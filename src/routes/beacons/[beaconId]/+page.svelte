@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { CardDisplay } from '$lib/components/card';
+	import { CardDisplay } from '$lib/ui/components/card';
 
 	const beaconFires = [
 		{ title: 'Dokapon Kingdom', description: 'This game...' },
