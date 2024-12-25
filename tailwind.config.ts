@@ -5,8 +5,7 @@ import { skeleton, contentPath } from '@skeletonlabs/skeleton/plugin';
 import * as themes from '@skeletonlabs/skeleton/themes';
 
 export default {
-	content: ['./src/**/*.{html,js,svelte,ts}', contentPath(import.meta.url, 'svelte')
-	],
+	content: ['./src/**/*.{html,js,svelte,ts}', contentPath(import.meta.url, 'svelte')],
 
 	theme: {
 		extend: {}
@@ -14,7 +13,10 @@ export default {
 
 	darkMode: 'selector',
 
-	plugins: [forms, skeleton({
-		themes: [themes.cerberus, themes.catppuccin]
-	})]
+	plugins: [
+		forms,
+		skeleton({
+			themes: [themes.cerberus, themes.catppuccin]
+		})
+	]
 } satisfies Config;

@@ -1,21 +1,31 @@
 import { result, option } from '$lib/util';
 import type { Result, Option } from '$lib/util';
-import { handleCreateBeacon, handleUpdateBeacon, handleGetBeacons, handleDeleteBeacon } from '$lib/api/beacons/beaconHandler'
+import {
+	handleCreateBeacon,
+	handleUpdateBeacon,
+	handleGetBeacons,
+	handleDeleteBeacon
+} from '$lib/api/beacons/beaconHandler';
 import type { Beacon } from './beaconModel';
 
 class BeaconStore {
-	#beacons: Beacon[] = $state([]);
+	beacons: Beacon[] = $state([]);
 
-	constructor(beacons: Beacon[]) {
-		this.#beacons = beacons;
+	constructor() {
+		handleGetBeacons().then((getResult) => {
+			switch (getResult.status) {
+				case 'success':
+					this.beacons = getResult.data;
+			}
+		});
 	}
 
-	async addBeacon(beacon: Beacon): Promise<Result<Beacon, string>> {
+	async add(beacon: Omit<Beacon, 'id'>): Promise<Result<Beacon, string>> {
 		const createResult = await handleCreateBeacon(beacon);
 
 		switch (createResult.status) {
 			case 'success':
-				this.#beacons = [...this.#beacons, createResult.data];
+				this.beacons = [...this.beacons, createResult.data];
 
 				return result.ok(createResult.data);
 			case 'error':
@@ -23,15 +33,11 @@ class BeaconStore {
 		}
 	}
 
-	getAllBeacons() {
-		return this.#beacons;
+	find(beaconId: string): Option<Beacon> {
+		return this.beacons.find((beacon) => beacon.id === beaconId);
 	}
 
-	findBeacon(beaconId: string): Option<Beacon> {
-		return this.#beacons.find(beacon => beacon.id === beaconId);
-	}
-
-	async updateBeacon(updatedBeacon: Beacon): Promise<Result<Option<Beacon>, string>> {
+	async update(updatedBeacon: Beacon): Promise<Result<Option<Beacon>, string>> {
 		const updateResult = await handleUpdateBeacon(updatedBeacon);
 
 		switch (updateResult.status) {
@@ -39,13 +45,13 @@ class BeaconStore {
 				if (option.isSome(updateResult.data)) {
 					// typescript could not figure out that updateResult.data is not undefined in the map callback, but it works with a proxy variable
 					const data = updateResult.data;
-					this.#beacons = this.#beacons.map(beacon => {
+					this.beacons = this.beacons.map((beacon) => {
 						if (beacon.id === data.id) {
-							return data
+							return data;
 						}
 
 						return beacon;
-					})
+					});
 				}
 
 				return result.ok(updateResult.data);
@@ -54,7 +60,7 @@ class BeaconStore {
 		}
 	}
 
-	async deleteBeacon(beaconId: string): Promise<Result<Option<Beacon>, string>> {
+	async delete(beaconId: string): Promise<Result<Option<Beacon>, string>> {
 		const deleteResult = await handleDeleteBeacon(beaconId);
 
 		switch (deleteResult.status) {
@@ -62,30 +68,14 @@ class BeaconStore {
 				if (option.isSome(deleteResult.data)) {
 					// typescript could not figure out that deleteResult.data is not undefined in the map callback, but it works with a proxy variable
 					const data = deleteResult.data;
-					this.#beacons = this.#beacons.filter(beacon => beacon.id === data.id);
+					this.beacons = this.beacons.filter((beacon) => beacon.id === data.id);
 				}
 
 				return result.ok(deleteResult.data);
 			case 'error':
 				return deleteResult;
 		}
-
 	}
-
-
 }
 
-async function init(): Promise<Beacon[]> {
-	const beaconResult = await handleGetBeacons();
-
-	switch (beaconResult.status) {
-		case 'success':
-			return beaconResult.data;
-		case 'error':
-			return [];
-	};
-}
-
-const beacons = await init();
-
-export const beaconStore = new BeaconStore(beacons);
+export const beaconStore = new BeaconStore();

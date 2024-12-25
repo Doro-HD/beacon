@@ -6,17 +6,16 @@ import Grid from '../Grid.svelte';
 import { createRawSnippet } from 'svelte';
 
 describe('Grid', () => {
-	const emptySnippet = createRawSnippet(() => ({ render: () => '<p>Foo</p>' }))
+	const emptySnippet = createRawSnippet(() => ({ render: () => '<p>Foo</p>' }));
 
 	test('Should be in the document', () => {
-		const card = render(Grid, { children: emptySnippet })
+		const card = render(Grid, { children: emptySnippet });
 
 		expect(card.baseElement).toBeInTheDocument();
 	}),
-
 		test('Should have the tailwind css classes', () => {
-			const grid = render(Grid, { children: emptySnippet })
+			const grid = render(Grid, { children: emptySnippet });
 
-			expect(grid.getByTestId('grid')).toHaveClass('grid grid-cols-4 gap-2')
-		})
+			expect(grid.getByTestId('grid')).toHaveClass('grid grid-cols-4 gap-2');
+		});
 });

@@ -1,25 +1,27 @@
 import { BaseDirectory } from "@tauri-apps/plugin-fs";
 import { z } from "zod";
+import cuid2 from "@paralleldrive/cuid2";
 
 import { fs } from "$lib/tauri";
 import { beaconSchema, type Beacon } from "./beaconModel";
 import { result, type Result, safeJSON, type Option } from "$lib/util";
 
-const FILE_NAME = 'beacons.json';
+const FILE_NAME = 'data/beacons.json';
 const BASE_DIR = BaseDirectory.AppData;
 
 /**
  * @description
  * A function that exposes a way for the rest of the application to create a beacon from the local file system
- * @param {Beacon} beacon - The beacon that should be added to the beacon file
+ * @param {Beacon} beaconPrimitive - The beacon that should be added to the beacon file
  * @returns - A result that tells if the create operation was a success
  */
-export async function handleCreateBeacon(beacon: Beacon): Promise<Result<Beacon, string>> {
+export async function handleCreateBeacon(beaconPrimitive: Omit<Beacon, 'id'>): Promise<Result<Beacon, string>> {
+	const beacon: Beacon = { ...beaconPrimitive, id: cuid2.createId() };
 	const createFn = (data: Beacon[]) => result.ok([...data, beacon]);
 
 	const overWriteResult = await overWriteBeaconFile(createFn);
 
-	return result.map(overWriteResult, _ => result.ok(beacon))
+	return result.map(overWriteResult, () => result.ok(beacon))
 }
 
 /**
@@ -31,8 +33,8 @@ export async function handleGetBeacons(): Promise<Result<Beacon[], string>> {
 	const readResult = await readBeaconFile();
 
 	return result.map(readResult, (data) => {
-		const parseResult = z.array(beaconSchema).safeParse(data);
-		if (!parseResult.success) {
+		const parseResult = safeJSON.parseWithSchema(data, z.array(beaconSchema));
+		if (parseResult.status === 'error') {
 			return result.err('Corrupted file');
 		}
 
@@ -64,7 +66,7 @@ export async function handleUpdateBeacon(updatedBeacon: Beacon): Promise<Result<
 
 	const overwriteResult = await overWriteBeaconFile(updateFn)
 
-	return result.map(overwriteResult, _ => {
+	return result.map(overwriteResult, () => {
 		switch (foundBeacon) {
 			case true:
 				return result.ok(updatedBeacon);
@@ -96,7 +98,7 @@ export async function handleDeleteBeacon(beaconId: string): Promise<Result<Optio
 
 	const overWriteResult = await overWriteBeaconFile(deleteFn);
 
-	return result.map(overWriteResult, _ => {
+	return result.map(overWriteResult, () => {
 		return result.ok(beacon)
 	})
 }

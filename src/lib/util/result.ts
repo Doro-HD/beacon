@@ -52,13 +52,37 @@ export function err<T>(data: T): Err<T> {
 		reason: data
 	};
 }
+
 /**
- * 
- * @param result 
- * @param fn 
- * @returns 
+ * @description
+ * Checks if a result is an ok value
+ * @param {Result<TOk, TErr>} result - The result that is checked
+ * @returns - A boolean value that determines if the result is an Ok value
  */
-export function map<TOk, TNewOk, TErr>(result: Result<TOk, TErr>, fn: (data: TOk) => Result<TNewOk, TErr>): Result<TNewOk, TErr> {
+export function isOk<TOk, TErr>(result: Result<TOk, TErr>): boolean {
+	return result.status === 'success';
+}
+
+/**
+ * @description
+ * Checks if a result is an Err value
+ * @param {Result<TOk, TErr>} result - The result that is checked
+ * @returns - A boolean value that determines if the result is an Err value
+ */
+export function isErr<TOk, TErr>(result: Result<TOk, TErr>): boolean {
+	return result.status !== 'success';
+}
+
+/**
+ *
+ * @param result
+ * @param fn
+ * @returns
+ */
+export function map<TOk, TNewOk, TErr>(
+	result: Result<TOk, TErr>,
+	fn: (data: TOk) => Result<TNewOk, TErr>
+): Result<TNewOk, TErr> {
 	switch (result.status) {
 		case 'success':
 			return fn(result.data);
@@ -67,7 +91,10 @@ export function map<TOk, TNewOk, TErr>(result: Result<TOk, TErr>, fn: (data: TOk
 	}
 }
 
-export async function mapAsync<TOk, TNewOk, TErr>(result: Result<TOk, TErr>, fn: (data: TOk) => Promise<Result<TNewOk, TErr>>): Promise<Result<TNewOk, TErr>> {
+export async function mapAsync<TOk, TNewOk, TErr>(
+	result: Result<TOk, TErr>,
+	fn: (data: TOk) => Promise<Result<TNewOk, TErr>>
+): Promise<Result<TNewOk, TErr>> {
 	switch (result.status) {
 		case 'success':
 			return fn(result.data);
@@ -76,8 +103,10 @@ export async function mapAsync<TOk, TNewOk, TErr>(result: Result<TOk, TErr>, fn:
 	}
 }
 
-
-export function mapError<TOk, TErr, TNewErr>(result: Result<TOk, TErr>, fn: (e: TErr) => Result<TOk, TNewErr>): Result<TOk, TNewErr> {
+export function mapError<TOk, TErr, TNewErr>(
+	result: Result<TOk, TErr>,
+	fn: (e: TErr) => Result<TOk, TNewErr>
+): Result<TOk, TNewErr> {
 	switch (result.status) {
 		case 'error':
 			return fn(result.reason);
@@ -86,7 +115,10 @@ export function mapError<TOk, TErr, TNewErr>(result: Result<TOk, TErr>, fn: (e: 
 	}
 }
 
-export async function mapErrorAsync<TOk, TErr, TNewErr>(result: Result<TOk, TErr>, fn: (e: TErr) => Promise<Result<TOk, TNewErr>>): Promise<Result<TOk, TNewErr>> {
+export async function mapErrorAsync<TOk, TErr, TNewErr>(
+	result: Result<TOk, TErr>,
+	fn: (e: TErr) => Promise<Result<TOk, TNewErr>>
+): Promise<Result<TOk, TNewErr>> {
 	switch (result.status) {
 		case 'error':
 			return fn(result.reason);
