@@ -17,7 +17,7 @@ A sidebar component, useful for having a vertical navigation bar.
 	const { class: className, items, basePath, header, headerVariant }: Props = $props();
 </script>
 
-<div class="border-e-4 {className}">
+<div class={['border-e-4', className]}>
 	<div class={sideBarHeaderVariants({ ...headerVariant })}>
 		{#if header}
 			{@render header()}
@@ -26,7 +26,7 @@ A sidebar component, useful for having a vertical navigation bar.
 
 	{#each items as item}
 		<div class="border-b-2 ps-1 preset-filled-surface-100-900">
-			<a href="/{basePath}/{item.identifier}" class="anchor type-scale-6">{item.title}</a>
+			<a href="/#/{basePath}/{item.identifier}" class="anchor type-scale-6">{item.title}</a>
 		</div>
 	{/each}
 </div>
