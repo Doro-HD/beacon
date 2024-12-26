@@ -3,4 +3,4 @@
 
 <p>Work in progress!</p>
 
-<a href="/beacons">Go to beacon site</a>
+<a href="/#/beacons">Go to beacon site</a>

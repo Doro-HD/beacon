@@ -36,7 +36,10 @@ export async function exists(
  * @param {MkdirOptions} options - Options for creating the dir
  * @returns - A result that tells if the operation was a success
  */
-export async function mkdir(path: string | URL, options?: MkdirOptions): Promise<Result<null, string>> {
+export async function mkdir(
+	path: string | URL,
+	options?: MkdirOptions
+): Promise<Result<null, string>> {
 	try {
 		await tauriMkdir(path, options);
 

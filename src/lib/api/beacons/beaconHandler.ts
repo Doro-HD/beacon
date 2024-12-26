@@ -1,10 +1,10 @@
-import { BaseDirectory } from "@tauri-apps/plugin-fs";
-import { z } from "zod";
-import cuid2 from "@paralleldrive/cuid2";
+import { BaseDirectory } from '@tauri-apps/plugin-fs';
+import { z } from 'zod';
+import cuid2 from '@paralleldrive/cuid2';
 
-import { fs } from "$lib/tauri";
-import { beaconSchema, type Beacon } from "./beaconModel";
-import { result, type Result, safeJSON, type Option } from "$lib/util";
+import { fs } from '$lib/tauri';
+import { beaconSchema, type Beacon } from './beaconModel';
+import { result, type Result, safeJSON, type Option } from '$lib/util';
 
 const FILE_NAME = 'data/beacons.json';
 const BASE_DIR = BaseDirectory.AppData;
@@ -15,13 +15,15 @@ const BASE_DIR = BaseDirectory.AppData;
  * @param {Beacon} beaconPrimitive - The beacon that should be added to the beacon file
  * @returns - A result that tells if the create operation was a success
  */
-export async function handleCreateBeacon(beaconPrimitive: Omit<Beacon, 'id'>): Promise<Result<Beacon, string>> {
+export async function handleCreateBeacon(
+	beaconPrimitive: Omit<Beacon, 'id'>
+): Promise<Result<Beacon, string>> {
 	const beacon: Beacon = { ...beaconPrimitive, id: cuid2.createId() };
 	const createFn = (data: Beacon[]) => result.ok([...data, beacon]);
 
 	const overWriteResult = await overWriteBeaconFile(createFn);
 
-	return result.map(overWriteResult, () => result.ok(beacon))
+	return result.map(overWriteResult, () => result.ok(beacon));
 }
 
 /**
@@ -48,10 +50,12 @@ export async function handleGetBeacons(): Promise<Result<Beacon[], string>> {
  * @param {Beacon} updatedBeacon - A beacon that will be used to overwrite an existing one, its id is used to select the beacon to overwrite
  * @returns - A result that tells if the update operation was a success
  */
-export async function handleUpdateBeacon(updatedBeacon: Beacon): Promise<Result<Option<Beacon>, string>> {
+export async function handleUpdateBeacon(
+	updatedBeacon: Beacon
+): Promise<Result<Option<Beacon>, string>> {
 	let foundBeacon = false;
 	const updateFn = (beaconFileObj: Beacon[]) => {
-		const updatedFileObj = beaconFileObj.map(beacon => {
+		const updatedFileObj = beaconFileObj.map((beacon) => {
 			if (beacon.id === updatedBeacon.id) {
 				foundBeacon = true;
 
@@ -64,7 +68,7 @@ export async function handleUpdateBeacon(updatedBeacon: Beacon): Promise<Result<
 		return result.ok(updatedFileObj);
 	};
 
-	const overwriteResult = await overWriteBeaconFile(updateFn)
+	const overwriteResult = await overWriteBeaconFile(updateFn);
 
 	return result.map(overwriteResult, () => {
 		switch (foundBeacon) {
@@ -82,10 +86,12 @@ export async function handleUpdateBeacon(updatedBeacon: Beacon): Promise<Result<
  * @param {string} beaconId - The id of a beacon, used to select the correct beacon for deletion
  * @returns - A result that tells if the delete operation was a success
  */
-export async function handleDeleteBeacon(beaconId: string): Promise<Result<Option<Beacon>, string>> {
+export async function handleDeleteBeacon(
+	beaconId: string
+): Promise<Result<Option<Beacon>, string>> {
 	let beacon: Option<Beacon> = undefined;
 	const deleteFn = (beaconFileObj: Beacon[]) => {
-		const beaconIndex = beaconFileObj.findIndex(beacon => beacon.id === beaconId);
+		const beaconIndex = beaconFileObj.findIndex((beacon) => beacon.id === beaconId);
 		if (beaconIndex < 0) {
 			return result.ok(beaconFileObj);
 		}
@@ -99,8 +105,8 @@ export async function handleDeleteBeacon(beaconId: string): Promise<Result<Optio
 	const overWriteResult = await overWriteBeaconFile(deleteFn);
 
 	return result.map(overWriteResult, () => {
-		return result.ok(beacon)
-	})
+		return result.ok(beacon);
+	});
 }
 
 /**
@@ -109,15 +115,17 @@ export async function handleDeleteBeacon(beaconId: string): Promise<Result<Optio
  * @param {(beacons: Beacon[]) => Result<Beacon[], string>} operation - A function representing an operatio to be carried over the contents of the beacon file
  * @returns - A result that tells if the read and write was successful
  */
-async function overWriteBeaconFile(operation: (beacons: Beacon[]) => Result<Beacon[], string>): Promise<Result<null, string>> {
+async function overWriteBeaconFile(
+	operation: (beacons: Beacon[]) => Result<Beacon[], string>
+): Promise<Result<null, string>> {
 	const readResult = await readBeaconFile();
 	const writeResult = await result.mapAsync(readResult, async (data) => {
 		const parseResult = safeJSON.parseWithSchema(data, z.array(beaconSchema));
 		const operationResult = result.map(parseResult, operation);
 
-		const strResult = result.map(operationResult, data => safeJSON.stringify(data));
+		const strResult = result.map(operationResult, (data) => safeJSON.stringify(data));
 
-		return result.mapAsync(strResult, data => writeBeaconFile(data));
+		return result.mapAsync(strResult, (data) => writeBeaconFile(data));
 	});
 
 	switch (writeResult.status) {

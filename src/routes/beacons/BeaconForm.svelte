@@ -35,7 +35,7 @@
 	}
 </script>
 
-<Form {id} onSubmit={submit}>
+<Form ariaLabel="beacon-form" {id} onSubmit={submit}>
 	<TextInput label="Name" bind:value={name} error={nameError}></TextInput>
 
 	<TextInput label="URL" bind:value={url} error={urlError}></TextInput>
