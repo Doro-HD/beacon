@@ -7,6 +7,7 @@ pub struct RSSItem {
     title: String,
     description: String,
     url: String,
+    thumbnail: Option<String>,
 }
 
 #[tauri::command]
@@ -45,12 +46,14 @@ fn parse_feed(document: Document) -> Vec<Result<RSSItem, String>> {
         let title_option: Option<String> = get_tag_text(item, "title");
         let description_option = get_tag_text(item, "description");
         let link_option = get_tag_text(item, "link");
+        let media_content_option = get_tag_attribute(item, "content", "url");
 
         let rss_item = match (title_option, description_option, link_option) {
             (Some(title), Some(description), Some(link)) => Ok(RSSItem {
                 title,
                 description,
                 url: link,
+                thumbnail: media_content_option,
             }),
             (_, _, _) => Err("Could not construct RSSItem".to_string()),
         };
@@ -68,4 +71,17 @@ where
     node.descendants()
         .find(|n| n.has_tag_name(tag_name))
         .and_then(|n| n.text().map(|text| String::from(text)))
+}
+
+fn get_tag_attribute<'a, 'input>(
+    node: Node<'a, 'input>,
+    tag_name: &str,
+    attribute_name: &str,
+) -> Option<String>
+where
+    'input: 'a,
+{
+    node.descendants()
+        .find(|n| n.has_tag_name(tag_name))
+        .and_then(|n| n.attribute(attribute_name).map(|text| String::from(text)))
 }

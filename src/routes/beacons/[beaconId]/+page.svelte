@@ -36,7 +36,11 @@
 		<p>Loading...</p>
 	{:then rssItems}
 		{@const cards = rssItems.map((rssItem) => ({
-			card: { title: rssItem.title, description: rssItem.description },
+			card: {
+				title: rssItem.title,
+				description: rssItem.description,
+				thumbnail: rssItem.thumbnail
+			},
 			meta: { rssUrl: rssItem.url }
 		}))}
 

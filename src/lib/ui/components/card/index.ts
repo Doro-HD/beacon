@@ -13,6 +13,7 @@ export type CardVariants = VariantProps<typeof cardVariants>;
 export type CardProps = {
 	title: string;
 	description: string;
+	thumbnail?: string;
 	actions?: Snippet<[Omit<CardProps, 'actions'>]>;
 };
 

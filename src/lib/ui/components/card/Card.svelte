@@ -6,13 +6,19 @@ A component used for displaying data in card format
 <script lang="ts">
 	import { cardVariants, type CardProps } from './index';
 
-	const { title, description, actions }: CardProps = $props();
+	const { title, description, thumbnail, actions }: CardProps = $props();
 </script>
 
 <div class={cardVariants()} data-testid="card">
-	<h6 class="h6">{title}</h6>
+	<header>
+		<img src={thumbnail ?? '/alt_beacon.png'} alt="Beacon" />
+	</header>
 
-	<p>{description}</p>
+	<article>
+		<h6 class="h6">{title}</h6>
+
+		<p>{description}</p>
+	</article>
 
 	{#if actions}
 		<footer class="flex justify-end">
