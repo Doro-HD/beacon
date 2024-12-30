@@ -5,25 +5,35 @@ A simple wrapper component around Skeletons button classes
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	import { buttonVariants } from './index';
-	import type { Presets } from '$lib/ui/presets';
+	import { buttonVariants, type ButtonVariants } from './index';
 
 	type Props = {
-		type?: 'button' | 'submit';
-		form?: string;
-		variant?: Presets;
+		options?: { type?: 'button' | 'submit'; form?: string } | { href?: string; target?: '_blank' };
+		class?: string;
+		variant?: ButtonVariants;
 		onclick?: () => void;
 		children: Snippet;
 	};
 	const {
-		type = 'button',
-		form,
+		options = { type: 'button' },
+		class: className,
 		variant = { filled: 'primary' },
 		onclick,
 		children
 	}: Props = $props();
 </script>
 
-<button {type} {form} class={buttonVariants({ ...variant })} {onclick}>
-	{@render children()}
-</button>
+{#if 'type' in options}
+	<button
+		type={options.type}
+		form={options.form}
+		class={buttonVariants({ ...variant, className })}
+		{onclick}
+	>
+		{@render children()}
+	</button>
+{:else if 'href' in options}
+	<a href={options.href} target={options.target} class={buttonVariants({ ...variant, className })}
+		>{@render children()}</a
+	>
+{/if}

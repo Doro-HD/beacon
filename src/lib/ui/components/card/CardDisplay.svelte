@@ -3,18 +3,26 @@
 A component used to display data in a card layout
 -->
 
-<script lang="ts">
+<script lang="ts" generics="T">
+	import type { Snippet } from 'svelte';
 	import { Grid } from '../grid';
 	import { Card, type CardProps } from './index';
 
 	type Props = {
-		cards: CardProps[];
+		dataCards: { card: CardProps; meta: T }[];
+		/** @description Apllies the css classes to all card components*/
+		class?: string;
+		dataActions: Snippet<[T]>;
 	};
-	const { cards }: Props = $props();
+	const { dataCards, class: className, dataActions }: Props = $props();
 </script>
 
 <Grid>
-	{#each cards as card, i (i)}
-		<Card title={card.title} description={card.description}></Card>
+	{#each dataCards as dataCard, i (i)}
+		<Card {...dataCard.card} class={className}>
+			{#snippet actions()}
+				{@render dataActions(dataCard.meta)}
+			{/snippet}
+		</Card>
 	{/each}
 </Grid>

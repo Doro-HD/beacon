@@ -68,7 +68,7 @@ class BeaconStore {
 				if (option.isSome(deleteResult.data)) {
 					// typescript could not figure out that deleteResult.data is not undefined in the map callback, but it works with a proxy variable
 					const data = deleteResult.data;
-					this.beacons = this.beacons.filter((beacon) => beacon.id === data.id);
+					this.beacons = this.beacons.filter((beacon) => beacon.id !== data.id);
 				}
 
 				return result.ok(deleteResult.data);

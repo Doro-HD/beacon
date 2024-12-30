@@ -96,7 +96,7 @@ export async function handleDeleteBeacon(
 			return result.ok(beaconFileObj);
 		}
 
-		const deletedBeacons = beaconFileObj.slice(beaconIndex, beaconIndex + 1);
+		const deletedBeacons = beaconFileObj.splice(beaconIndex, 1);
 		beacon = deletedBeacons.at(0);
 
 		return result.ok(beaconFileObj);

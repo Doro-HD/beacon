@@ -11,19 +11,19 @@
 		triggerInner: Snippet;
 		triggerVariant?: ButtonVariants;
 		header?: Snippet;
+		body: Snippet<[() => void]>;
 		/** @desciption A snippet that renders inside the modals footer, parses a function that will close the dialog as an argument */
 		footer?: Snippet<[() => void]>;
 		footerVariant?: ModalFooterVariants;
-		children: Snippet;
 	};
 	let {
 		isOpen = $bindable(false),
 		triggerInner,
 		triggerVariant = { filled: 'primary' },
 		header,
+		body,
 		footer,
-		footerVariant,
-		children
+		footerVariant
 	}: Props = $props();
 
 	function close() {
@@ -49,7 +49,7 @@
 		{/if}
 
 		<article>
-			{@render children()}
+			{@render body(close)}
 		</article>
 
 		{#if footer}

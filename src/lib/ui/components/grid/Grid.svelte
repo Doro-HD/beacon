@@ -13,6 +13,6 @@ For example a card view
 	const { children }: Props = $props();
 </script>
 
-<div class="grid grid-cols-4 gap-2" data-testid="grid">
+<div class="grid grid-cols-3 gap-2" data-testid="grid">
 	{@render children()}
 </div>

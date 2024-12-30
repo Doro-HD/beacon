@@ -12,10 +12,11 @@ describe('Grid', () => {
 		const card = render(Grid, { children: emptySnippet });
 
 		expect(card.baseElement).toBeInTheDocument();
-	}),
-		test('Should have the tailwind css classes', () => {
-			const grid = render(Grid, { children: emptySnippet });
+	});
 
-			expect(grid.getByTestId('grid')).toHaveClass('grid grid-cols-4 gap-2');
-		});
+	test('Should have the tailwind css classes', () => {
+		const grid = render(Grid, { children: emptySnippet });
+
+		expect(grid.getByTestId('grid')).toHaveClass('grid grid-cols-3 gap-2');
+	});
 });

@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { Button } from '$lib/ui/components/button';
 </script>
 
 <p>Work in progress!</p>
 
-<a href="/#/beacons">Go to beacon site</a>
+<Button options={{ href: '/#/beacons' }}>Go to beacon site</Button>

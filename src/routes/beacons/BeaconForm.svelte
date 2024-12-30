@@ -6,21 +6,29 @@
 
 	type Props = {
 		id?: string;
+		beaconName?: string;
+		beaconUrl?: string;
 		onSubmit: (beacon: Omit<Beacon, 'id'>) => void;
 		children?: Snippet;
 	};
-	const { id = 'beacon-form', onSubmit, children }: Props = $props();
+	let {
+		id = 'beacon-form',
+		beaconName = $bindable(''),
+		beaconUrl = $bindable(''),
+		onSubmit,
+		children
+	}: Props = $props();
 
-	let name = $state('');
 	let nameError: string | undefined = $state(undefined);
 
-	let url = $state('');
 	let urlError: string | undefined = $state(undefined);
 
 	function submit(event: SubmitEvent) {
 		event.preventDefault();
 
-		const schemaResult = beaconSchema.omit({ id: true }).safeParse({ name, url });
+		const schemaResult = beaconSchema
+			.omit({ id: true })
+			.safeParse({ name: beaconName, url: beaconUrl });
 		if (!schemaResult.success) {
 			const formattedError = schemaResult.error.format();
 
@@ -36,9 +44,9 @@
 </script>
 
 <Form ariaLabel="beacon-form" {id} onSubmit={submit}>
-	<TextInput label="Name" bind:value={name} error={nameError}></TextInput>
+	<TextInput label="Name" bind:value={beaconName} error={nameError}></TextInput>
 
-	<TextInput label="URL" bind:value={url} error={urlError}></TextInput>
+	<TextInput label="URL" bind:value={beaconUrl} error={urlError}></TextInput>
 
 	{#if children}
 		{@render children()}

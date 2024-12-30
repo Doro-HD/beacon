@@ -35,6 +35,7 @@
 		"svelte": "^5.16.0",
 		"svelte-check": "^4.1.1",
 		"tailwindcss": "^3.4.17",
+		"tailwindcss-motion": "^1.0.0",
 		"typescript": "^5.7.2",
 		"typescript-eslint": "^8.18.1",
 		"vite": "^6.0.5",
@@ -43,7 +44,11 @@
 	"dependencies": {
 		"@paralleldrive/cuid2": "^2.2.2",
 		"@tailwindcss/forms": "^0.5.9",
+		"@tauri-apps/api": "^2.1.1",
 		"@tauri-apps/plugin-fs": "~2.2.0",
+		"@tauri-apps/plugin-http": "~2",
+		"@tauri-apps/plugin-shell": "~2",
+		"lucide-svelte": "^0.469.0",
 		"mode-watcher": "^0.5.0",
 		"tailwind-variants": "^0.3.0",
 		"zod": "^3.24.1"

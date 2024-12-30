@@ -55,6 +55,21 @@ export function err<T>(data: T): Err<T> {
 
 /**
  * @description
+ * Flattens a nested result into a single result object
+ * @param {Result<Result<TOk, TErr>, TErr>} result -
+ * @returns - the unested result object
+ */
+export function flatten<TOk, TErr>(result: Result<Result<TOk, TErr>, TErr>): Result<TOk, TErr> {
+	switch (result.status) {
+		case 'success':
+			return result.data;
+		case 'error':
+			return result;
+	}
+}
+
+/**
+ * @description
  * Checks if a result is an ok value
  * @param {Result<TOk, TErr>} result - The result that is checked
  * @returns - A boolean value that determines if the result is an Ok value
