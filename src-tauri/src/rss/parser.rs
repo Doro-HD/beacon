@@ -1,5 +1,5 @@
 use roxmltree::{Document, Node};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use tauri_plugin_http::reqwest;
 
 #[derive(Serialize)]
@@ -10,13 +10,27 @@ pub struct RSSItem {
     thumbnail: Option<String>,
 }
 
+#[derive(Deserialize)]
+pub enum FeedKind {
+    RSS,
+    Youtube,
+}
+
 #[tauri::command]
-pub async fn get_rss_items(feed_url: String) -> Result<Vec<Result<RSSItem, String>>, String> {
+pub async fn get_rss_items(
+    feed_url: String,
+    feed_kind: FeedKind,
+) -> Result<Vec<Result<RSSItem, String>>, String> {
     let feed_result = get_feed(feed_url).await;
+
+    let parser = match feed_kind {
+        FeedKind::RSS => parse_feed,
+        FeedKind::Youtube => parse_youtube_feed,
+    };
 
     let rss_items = match feed_result {
         Ok(feed) => Document::parse(&feed)
-            .map(|document| parse_feed(document))
+            .map(|document| parser(document))
             .map_err(|err| err.to_string()),
         Err(err) => Err(err),
     };
@@ -39,6 +53,7 @@ async fn get_feed(feed_url: String) -> Result<String, String> {
     }
 }
 
+/// Used to parse a normal RSS feed
 fn parse_feed(document: Document) -> Vec<Result<RSSItem, String>> {
     let mut items: Vec<Result<RSSItem, String>> = Vec::new();
 
@@ -54,6 +69,32 @@ fn parse_feed(document: Document) -> Vec<Result<RSSItem, String>> {
                 description,
                 url: link,
                 thumbnail: media_content_option,
+            }),
+            (_, _, _) => Err("Could not construct RSSItem".to_string()),
+        };
+
+        items.push(rss_item);
+    }
+
+    items
+}
+
+/// Used to parse a youtube feed
+fn parse_youtube_feed(document: Document) -> Vec<Result<RSSItem, String>> {
+    let mut items: Vec<Result<RSSItem, String>> = Vec::new();
+
+    for item in document.descendants().filter(|n| n.has_tag_name("entry")) {
+        let title_option: Option<String> = get_tag_text(item, "title");
+        let description_option = get_tag_text(item, "description");
+        let link_option = get_tag_attribute(item, "link", "href");
+        let thumbnail_option = get_tag_attribute(item, "thumbnail", "url");
+
+        let rss_item = match (title_option, description_option, link_option) {
+            (Some(title), Some(description), Some(link)) => Ok(RSSItem {
+                title,
+                description,
+                url: link,
+                thumbnail: thumbnail_option,
             }),
             (_, _, _) => Err("Could not construct RSSItem".to_string()),
         };

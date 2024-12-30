@@ -15,9 +15,9 @@ A component used for displaying data in card format
 	</header>
 
 	<article>
-		<h6 class="h6">{title}</h6>
+		<h5 class="h5">{title}</h5>
 
-		<p>{description}</p>
+		<p class="line-clamp-5">{description}</p>
 	</article>
 
 	{#if actions}
