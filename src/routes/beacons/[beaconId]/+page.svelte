@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { Avatar } from '@skeletonlabs/skeleton-svelte';
 	import { SquareArrowOutUpRight } from 'lucide-svelte';
 
+	import { option } from '$lib/util';
 	import { beaconStore } from '$lib/api/beacons';
-	import { getRSSItems } from '$lib/tauri/commands/rss';
-	import Button from '$lib/ui/components/button/Button.svelte';
-	import { CardDisplay, type CardProps } from '$lib/ui/components/card';
-	import { result } from '$lib/util';
+	import { signalFireStore } from '$lib/api/signalFire';
+	import { Button } from '$lib/ui/components/button';
+	import { CardDisplay } from '$lib/ui/components/card';
+	import { ScrollableArea } from '$lib/ui/components/scrollableArea';
 
 	let rssItemsPromise = $derived.by(async () => {
 		const beaconId = page.params.beaconId;
@@ -15,27 +17,39 @@
 			throw Error('Could not find beacon with id: ' + beaconId);
 		}
 
-		const rssItemResults = await getRSSItems(beacon.url);
-		if (rssItemResults.status === 'error') {
-			throw Error(rssItemResults.reason);
+		const signalFires = signalFireStore.getSignalFires(beacon.id);
+		if (option.isSome(signalFires)) {
+			return {
+				beacon,
+				signalFires
+			};
 		}
 
-		return rssItemResults.data.map((rssItemResult) =>
-			result.unwrapOr(rssItemResult, {
-				title: 'Error: Could not get all the information for this item',
-				description:
-					'Some of the information for this item, like the title and description, was not available',
-				url: ''
-			})
-		);
+		const addResult = await signalFireStore.addSignalFires(beacon.id, beacon.url);
+		if (addResult.status === 'error') {
+			throw Error(addResult.reason);
+		}
+
+		return {
+			beacon,
+			signalFires: addResult.data
+		};
 	});
 </script>
 
-<div class="px-5">
+<div class="space-y-2">
 	{#await rssItemsPromise}
 		<p>Loading...</p>
-	{:then rssItems}
-		{@const cards = rssItems.map((rssItem) => ({
+	{:then data}
+		<header
+			class="sticky left-0 top-0 z-50 flex h-28 w-full items-center gap-x-2 ps-2 preset-filled-surface-100-900"
+		>
+			<Avatar src="/alt_avatar.png" name="beacon-avatar"></Avatar>
+
+			<a href={data.beacon.url} target="_blank" class="h2 underline">{data.beacon.name}</a>
+		</header>
+
+		{@const cards = data.signalFires.map((rssItem) => ({
 			card: {
 				title: rssItem.title,
 				description: rssItem.description,
@@ -44,14 +58,21 @@
 			meta: { rssUrl: rssItem.url }
 		}))}
 
-		<CardDisplay dataCards={cards}>
-			{#snippet dataActions(meta)}
-				<Button options={{ href: meta.rssUrl, target: '_blank' }} variant={{ filled: 'warning' }}>
-					Source
-					<SquareArrowOutUpRight></SquareArrowOutUpRight>
-				</Button>
-			{/snippet}
-		</CardDisplay>
+		<article>
+			<ScrollableArea class="py-5">
+				<CardDisplay dataCards={cards} class="motion-preset-fade-lg">
+					{#snippet dataActions(meta)}
+						<Button
+							options={{ href: meta.rssUrl, target: '_blank' }}
+							variant={{ filled: 'warning' }}
+						>
+							Source
+							<SquareArrowOutUpRight></SquareArrowOutUpRight>
+						</Button>
+					{/snippet}
+				</CardDisplay>
+			</ScrollableArea>
+		</article>
 	{:catch err}
 		<p>Error: {err}</p>
 	{/await}

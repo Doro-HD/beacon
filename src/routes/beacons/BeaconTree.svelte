@@ -11,6 +11,7 @@ A componnet for handling a file like tree structure, provides an interface for c
 	import { Modal } from '$lib/ui/components/modal';
 	import { Button } from '$lib/ui/components/button';
 	import BeaconForm from './BeaconForm.svelte';
+	import { setMode } from 'mode-watcher';
 
 	const toast: ToastContext = getContext('toast');
 
@@ -77,8 +78,8 @@ A componnet for handling a file like tree structure, provides an interface for c
 </script>
 
 <div class="h-full space-y-2 border-e-4">
-	<div class="flex justify-between">
-		<h6 class="h6">Beacons</h6>
+	<header class="flex justify-between p-2 preset-filled-surface-100-900">
+		<h5 class="h5">Beacons</h5>
 
 		<Modal
 			triggerVariant={{ outlined: 'primary' }}
@@ -107,11 +108,11 @@ A componnet for handling a file like tree structure, provides an interface for c
 				>
 			{/snippet}
 		</Modal>
-	</div>
+	</header>
 
 	{#each beaconStore.beacons as beacon (beacon.id)}
 		{@const formId = `edit-beacon-${beacon.id}`}
-		<div class="group motion-preset-fade relative border-b-2 ps-1 preset-filled-surface-100-900">
+		<div class="group motion-preset-fade relative border-b-2 ps-1">
 			<div class="motion-preset-fade absolute right-0 top-0 hidden gap-x-2 group-hover:flex">
 				<Modal
 					triggerVariant={{ filled: 'tertiary', size: 'sm' }}

@@ -4,11 +4,11 @@ import { result, type Result } from '$lib/util';
 export type RustResult<TOk, TErr> = RustOk<TOk> | RustErr<TErr>;
 
 type RustOk<T> = {
-    Ok: T
+	Ok: T;
 };
 
 type RustErr<T> = {
-    Err: T
+	Err: T;
 };
 
 /**
@@ -19,14 +19,18 @@ type RustErr<T> = {
  * @param {InvokeOptions} options - The request options
  * @returns {Promise<Result<T, string>>} - A result object that contains either a Ok value with data or an Err object with a string message
  */
-export async function invoke<T>(command: string, args?: InvokeArgs, options?: InvokeOptions): Promise<Result<T, string>> {
-    try {
-        const data = await tauriInvoke<T>(command, args, options);
+export async function invoke<T>(
+	command: string,
+	args?: InvokeArgs,
+	options?: InvokeOptions
+): Promise<Result<T, string>> {
+	try {
+		const data = await tauriInvoke<T>(command, args, options);
 
-        return result.ok(data);
-    } catch (e) {
-        return result.err('Invoke failed due to: ' + e);
-    }
+		return result.ok(data);
+	} catch (e) {
+		return result.err('Invoke failed due to: ' + e);
+	}
 }
 
 /**
@@ -35,12 +39,14 @@ export async function invoke<T>(command: string, args?: InvokeArgs, options?: In
  * @param {RustResult<RustResult<TOk, TErr>>} result - The result to flatten
  * @returns {RustResult<TOk, TErr>} - The the nested result object
  */
-export function flatten<TOk, TErr>(result: RustResult<RustResult<TOk, TErr>, TErr>): RustResult<TOk, TErr> {
-    if ('Ok' in result) {
-        return result.Ok;
-    } else {
-        return result;
-    }
+export function flatten<TOk, TErr>(
+	result: RustResult<RustResult<TOk, TErr>, TErr>
+): RustResult<TOk, TErr> {
+	if ('Ok' in result) {
+		return result.Ok;
+	} else {
+		return result;
+	}
 }
 
 /**
@@ -49,13 +55,15 @@ export function flatten<TOk, TErr>(result: RustResult<RustResult<TOk, TErr>, TEr
  * @param {Result<RustResult<TOk, TErr>>} result - The result to flatten
  * @returns {RustResult<TOk, TErr>} - The the nested result object
  */
-export function flattenCompound<TOk, TErr>(result: Result<RustResult<TOk, TErr>, TErr>): RustResult<TOk, TErr> {
-    switch (result.status) {
-        case 'success':
-            return result.data;
-        case 'error':
-            return { Err: result.reason };
-    }
+export function flattenCompound<TOk, TErr>(
+	result: Result<RustResult<TOk, TErr>, TErr>
+): RustResult<TOk, TErr> {
+	switch (result.status) {
+		case 'success':
+			return result.data;
+		case 'error':
+			return { Err: result.reason };
+	}
 }
 
 /**
@@ -65,9 +73,9 @@ export function flattenCompound<TOk, TErr>(result: Result<RustResult<TOk, TErr>,
  * @returns {Result<TOk, TErr>} - A new result object with the data from the rust result object
  */
 export function toResult<TOk, TErr>(rustResult: RustResult<TOk, TErr>): Result<TOk, TErr> {
-    if ('Ok' in rustResult) {
-        return result.ok(rustResult.Ok);
-    } else {
-        return result.err(rustResult.Err);
-    }
+	if ('Ok' in rustResult) {
+		return result.ok(rustResult.Ok);
+	} else {
+		return result.err(rustResult.Err);
+	}
 }

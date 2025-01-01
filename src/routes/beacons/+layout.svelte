@@ -10,12 +10,12 @@
 	const { children }: Props = $props();
 </script>
 
-<div class="flex h-screen flex-row">
-	<div class="min-w-96">
+<div class="relative flex h-screen flex-row">
+	<div class="fixed left-0 top-0 h-screen w-96">
 		<BeaconTree></BeaconTree>
 	</div>
 
-	<div class="px-2">
+	<div class="ps-96">
 		{@render children()}
 	</div>
 </div>

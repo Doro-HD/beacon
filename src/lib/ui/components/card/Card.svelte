@@ -4,12 +4,19 @@ A component used for displaying data in card format
 -->
 
 <script lang="ts">
-	import { cardVariants, type CardProps } from './index';
+	import { cardVariants, type CardProps, type CardVariants } from './index';
 
-	const { title, description, thumbnail, actions }: CardProps = $props();
+	const {
+		title,
+		description,
+		thumbnail,
+		class: className,
+		variant,
+		actions
+	}: CardProps & { class?: string | string[]; variant?: CardVariants } = $props();
 </script>
 
-<div class={cardVariants()} data-testid="card">
+<div class={cardVariants({ ...variant, className })} data-testid="card">
 	<header>
 		<img src={thumbnail ?? '/alt_beacon.png'} alt="Beacon" />
 	</header>
@@ -21,7 +28,7 @@ A component used for displaying data in card format
 	</article>
 
 	{#if actions}
-		<footer class="flex justify-end">
+		<footer class="self-end">
 			{@render actions({ title, description })}
 		</footer>
 	{/if}
