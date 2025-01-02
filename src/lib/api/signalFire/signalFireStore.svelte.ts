@@ -1,23 +1,52 @@
-import { result, type Result, type Option } from '$lib/util';
+import { option, result, type Result } from '$lib/util';
 import { getRSSItems } from '$lib/tauri/commands/rss';
 import type { SignalFire } from './signalFireModel';
+import { page } from '$app/state';
+import { beaconStore } from '../beacons';
+import { SvelteMap } from 'svelte/reactivity';
 
 /**
  * @description
  * A store for keeping track of Signal Fires for a collection of Beacons
  */
 class SignalFireStore {
-	/**
-	 * @description
-	 * A map over the fetched Signal Fires, the key being a beacon id
-	 */
-	signalFires: Map<string, SignalFire[]> = $state(new Map());
 
-	getSignalFires(beaconId: string): Option<SignalFire[]> {
-		return this.signalFires.get(beaconId);
-	}
+	cache: Map<string, { signalFires: SignalFire[], intervalId: number }> = $state(new SvelteMap());
+	signalFires: Promise<Result<SignalFire[], string>> = $derived.by(async () => {
+		const beaconId = page.params.beaconId;
+		const foo = this.cache.get(beaconId);
+		if (foo) {
+			return result.ok(foo.signalFires);
+		}
+
+		const baz = beaconStore.find(beaconId);
+		if (option.isNone(baz)) {
+			return result.err('Could not find Beacon');
+		}
+
+		return this.addSignalFires(baz.id, baz.url);
+	});
 
 	async addSignalFires(beaconId: string, beaconUrl: string): Promise<Result<SignalFire[], string>> {
+		const rssItemsResult = await this.fetchSignalFires(beaconUrl);
+
+		if (rssItemsResult.status === 'error') {
+			return rssItemsResult;
+		}
+
+		const intervalId = setInterval(async () => {
+			const rssItemsResult = await this.fetchSignalFires(beaconUrl);
+			if (rssItemsResult.status === 'success') {
+				this.cache.set(beaconId, { signalFires: [{ title: 'Foo', description: 'Foo', url: '' }, ...rssItemsResult.data], intervalId });
+			}
+		}, 3000);
+
+		this.cache.set(beaconId, { signalFires: rssItemsResult.data, intervalId });
+
+		return result.ok(rssItemsResult.data);
+	}
+
+	async fetchSignalFires(beaconUrl: string): Promise<Result<SignalFire[], string>> {
 		const rssItemResults = await getRSSItems(beaconUrl);
 		if (rssItemResults.status === 'error') {
 			return rssItemResults;
@@ -31,8 +60,6 @@ class SignalFireStore {
 				url: ''
 			})
 		);
-
-		this.signalFires.set(beaconId, rssItems);
 
 		return result.ok(rssItems);
 	}
